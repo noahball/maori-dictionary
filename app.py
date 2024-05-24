@@ -1,20 +1,9 @@
-import os
-
 from flask import Flask
-from dotenv import load_dotenv
-
-from lib import create_connection
+from routes import pages
 
 app = Flask(__name__)
-load_dotenv()
 
-DATABASE_FILE = os.getenv('DB_FILE')
-
-
-@app.route('/')
-def hello_world():
-    return 'Hello, World!'
-
+app.add_url_rule('/', 'home_page', view_func=pages.home_page)
 
 if __name__ == '__main__':
     app.run()
