@@ -4,7 +4,7 @@ from lib import db
 
 
 def home_page():
-    query = "SELECT id, maori, english, definition, level, category FROM word"
+    query = "SELECT id, maori, english, definition, level, category, filename FROM word"
     conn = db.create_connection(globals.DATABASE_FILE)
     cur = conn.cursor()
     cur.execute(query)
