@@ -4,4 +4,10 @@ from lib import db
 
 
 def home_page():
-    return render_template('home.html')
+    query = "SELECT id, maori, english, definition, level, category FROM word"
+    conn = db.create_connection(globals.DATABASE_FILE)
+    cur = conn.cursor()
+    cur.execute(query)
+    words = cur.fetchall()
+    conn.close()
+    return render_template('home.html', words=words)

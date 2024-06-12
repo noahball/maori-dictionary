@@ -5,5 +5,25 @@
 {% block heading %}Māori - English Dictionary{% endblock %}
 
 {% block main %}
-
+    <table>
+        <tr>
+            <th>Image</th>
+            <th>Māori</th>
+            <th>English</th>
+            <th>Definition</th>
+            <th>Level</th>
+            <th>Category</th>
+        </tr>
+        {% for word in words %}
+            <tr>
+                <td><img src="/static/images/{{ word[2] }}.png" alt="{{ word[2] }}" width="100" height="100"></td>
+                <td>{{ word[1] }}</td>
+                <td>{{ word[2] }}</td>
+                <td>{{ word[3] }}</td>
+                <td>{{ word[4] }}</td>
+                <td>{{ word[5] }}</td>
+            </tr>
+        {% endfor %}
+        </tr>
+    </table>
 {% endblock %}
