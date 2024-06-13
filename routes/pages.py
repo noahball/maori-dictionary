@@ -12,5 +12,4 @@ def home_page():
     conn.close()
 
     categories = helpers.get_categories()
-    categories = [c[1] for c in categories]
     return render_template('home.html', words=words, categories=categories)

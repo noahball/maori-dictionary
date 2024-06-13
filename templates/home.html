@@ -21,7 +21,7 @@
                 <td>{{ word[2] }}</td>
                 <td>{{ word[3] }}</td>
                 <td>{{ word[4] }}</td>
-                <td>{{ categories[word[5]] }}</td>
+                <td>{{ categories[word[5] - 1][1] }}</td> <!-- We are subtracting one here because SQL IDs start at 1, but Python tuple positions start at 0  -->
             </tr>
         {% endfor %}
         </tr>
