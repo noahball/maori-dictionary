@@ -24,3 +24,9 @@ def category_page(cat_id):
 
     categories = helpers.get_categories()
     return render_template('home.html', words=words, categories=categories)
+
+def login_page():
+    return render_template('login.html')
+
+def signup_page():
+    return render_template('signup.html')

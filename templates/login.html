@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block title %}Māori Dictionary | Login{% endblock %}
+
+{% block heading %}Māori - English Dictionary{% endblock %}
+
+{% block main %}
+    <h2>Log in to your account</h2>
+    <form>
+    <div class="dataForm">
+        <p>Username</p>
+        <input type="text" id="username" name="username" required>
+        <p>Password</p>
+        <input type="password" id="password" name="password" required>
+        <input type="submit" value="Log in">
+        <p>Don't have an account? <a href="">Sign Up</a></p>
+    </div>
+    </form>
+{% endblock %}
