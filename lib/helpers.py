@@ -1,3 +1,5 @@
+from flask import session
+
 from lib import db
 from lib import globals
 
@@ -10,3 +12,6 @@ def get_categories():
     categories = cur.fetchall()
     conn.close()
     return categories
+
+def user_authenticated():
+    return 'user_id' in session

@@ -1,7 +1,9 @@
 from flask import Flask
+from lib import globals
 from routes import pages
 
 app = Flask(__name__)
+app.secret_key = globals.SECRET_KEY
 
 app.add_url_rule('/', 'home_page', view_func=pages.home_page)
 app.add_url_rule('/category/<cat_id>', 'category_page', view_func=pages.category_page)
