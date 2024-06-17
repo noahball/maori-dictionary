@@ -21,10 +21,24 @@
         <span></span>
         <span></span>
         <ul>
+            {% if session["username"] %}
+                <li><a>Logged in as<br>{{ session["name"] }}</a></li>
+                <br>
+                {% if session["user_type"] == 1 %}
+                    <li><a>You have student access</a></li>
+                {% elif session["user_type"] == 2 %}
+                    <li><a>You have teacher access</a></li>
+                {% endif %}
+                <br>
+            {% endif %}
             <li><a href="/">Home</a></li>
             <br>
-            <li><a href="/login">Log In</a></li>
-            <li><a href="/signup">Sign Up</a></li>
+            {% if not session["user_id"] %}
+                <li><a href="/login">Log In</a></li>
+                <li><a href="/signup">Sign Up</a></li>
+            {% else %}
+                <li><a href="/logout">Log Out</a></li>
+            {% endif %}
             <br>
             {% for category in categories %}
                 <li><a href="/category/{{ category[0] }}">{{ category[1] }}</a></li>
