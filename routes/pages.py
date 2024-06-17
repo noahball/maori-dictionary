@@ -45,6 +45,9 @@ def login_page():
         user_data = cur.fetchone()
         conn.close()
 
+        if user_data is None:
+            return redirect('/login?error=Invalid+username+or+password')
+
         try:
             user_id = user_data[0]
             name = user_data[1]
@@ -64,7 +67,7 @@ def login_page():
 
         return redirect('/')
 
-    return render_template('login.html')
+    return render_template('login.html', error=request.args.get('error'))
 
 def signup_page():
     if request.method == 'POST':
@@ -98,4 +101,8 @@ def signup_page():
 
         return redirect('/login')
 
-    return render_template('signup.html')
+    return render_template('signup.html', error=request.args.get('error'))
+
+def logout_page():
+    session.clear()
+    return redirect('/login')
