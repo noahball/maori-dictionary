@@ -1,7 +1,6 @@
 from flask import session
 
-from lib import db
-from lib import globals
+from lib import db, globals
 
 
 def get_categories():
