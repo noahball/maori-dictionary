@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block title %}Māori Dictionary | Home{% endblock %}
+
+{% block heading %}Māori - English Dictionary{% endblock %}
+
+{% block main %}
+    <div>
+        <h1 style="padding-bottom: 0">{{ word[1] }}</h1>
+        <h2 style="padding-top: 0">{{ word[2] }}</h2>
+        <p>Definition: {{ word[3] }}</p>
+        <p>Level: {{ word[4] }}</p>
+        <p>Category: {{ word[5] }}</p>
+    </div>
+    <div>
+    <img style="max-height: 400px; max-width: 400px; padding-top: 1rem" src="/static/images/{{ word[6] or "noimage.jpg" }}" alt="{{ word[2] }}">
+    </div>
+{% endblock %}

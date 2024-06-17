@@ -3,6 +3,8 @@ from lib import globals, db, helpers, flask_server
 
 bcrypt = flask_server.bcrypt
 
+# TODO: Signup error handling
+
 def login_page():
     if helpers.user_authenticated():
         return redirect('/')

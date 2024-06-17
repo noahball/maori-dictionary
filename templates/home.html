@@ -13,6 +13,7 @@
             <th>Definition</th>
             <th>Level</th>
             <th>Category</th>
+            <th>Actions</th>
         </tr>
         {% for word in words %}
             <tr>
@@ -22,6 +23,7 @@
                 <td>{{ word[3] }}</td>
                 <td>{{ word[4] }}</td>
                 <td>{{ categories[word[5] - 1][1] }}</td> <!-- We are subtracting one here because SQL IDs start at 1, but Python tuple positions start at 0  -->
+                <td><a href="/word/{{ word[0] }}">View</a></td>
             </tr>
         {% endfor %}
         </tr>

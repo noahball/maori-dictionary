@@ -28,3 +28,17 @@ def category_page(cat_id):
 
     categories = helpers.get_categories()
     return render_template('home.html', words=words, categories=categories)
+
+def word_page(word_id):
+    if not helpers.user_authenticated():
+        return redirect('/login')
+
+    query = "SELECT id, maori, english, definition, level, category, filename FROM word WHERE id = ?"
+    conn = db.create_connection(globals.DATABASE_FILE)
+    cur = conn.cursor()
+    cur.execute(query, (word_id,))
+    word = cur.fetchone()
+    conn.close()
+
+    categories = helpers.get_categories()
+    return render_template('word.html', word=word, categories=categories)
