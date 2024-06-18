@@ -30,9 +30,8 @@
                     <li><a>You have teacher access</a></li>
                 {% endif %}
                 <br>
+                <li><a href="/">Home</a></li>
             {% endif %}
-            <li><a href="/">Home</a></li>
-            <br>
             {% if not session["user_id"] %}
                 <li><a href="/login">Log In</a></li>
                 <li><a href="/signup">Sign Up</a></li>
