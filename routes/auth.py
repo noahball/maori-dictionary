@@ -94,7 +94,7 @@ def signup_page():
 
         if user_data is not None:  # If the user already exists
             return redirect(
-                '/signup?error=Username+already+exists')  # Redirect to the sign up page with an error message
+                '/signup?error=Username+is+already+taken')  # Redirect to the sign up page with an error message
 
         query = "INSERT INTO user (name, username, password, type) VALUES (?, ?, ?, ?)"  # Query to insert the new user into the database
         conn = db.create_connection(globals.DATABASE_FILE)  # Create a connection to the database
