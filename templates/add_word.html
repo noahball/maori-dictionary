@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block title %}Māori Dictionary | Add Word{% endblock %}
+
+{% block heading %}Māori - English Dictionary{% endblock %}
+
+{% block main %}
+    <h2>Add a word to {{ cat_name }}</h2>
+    {% if error %}
+        <p>{{ error }}</p>
+    {% endif %}
+    <form action="/add_word/{{ cat_id }}" method="post">
+    <div class="dataForm">
+        <p>Category</p>
+        <input type="text" id="category_display" name="category_display" value="{{ cat_name }}" required disabled>
+        <p>Māori</p>
+        <input type="text" id="maori" name="maori" required>
+        <p>English</p>
+        <input type="text" id="english" name="english" required>
+        <p>Definition</p>
+        <input type="text" id="definition" name="definition" required>
+        <p>Level</p>
+        <input type="text" id="level" name="level" required>
+        <p>Image File</p>
+        <input type="text" id="filename" name="filename" required>
+        <input type="submit" value="Add word">
+    </div>
+    </form>
+{% endblock %}

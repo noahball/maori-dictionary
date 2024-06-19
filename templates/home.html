@@ -6,6 +6,12 @@
 
 {% block main %}
     <h2>{{ cat_name }}</h2>
+    {% if cat_id and session["user_type"] == 2 %}
+        <a href="/add-word/{{ cat_id }}"><button class="add-button">Add a new word</button></a>
+    {% elif session["user_type"] == 2 %}
+        <p><i>Add a new word on the page for the category you would like to add it to.</i></p>
+        <br>
+    {% endif %}
     {% if error %}
         <p>{{ error }}</p>
         <br>

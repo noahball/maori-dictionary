@@ -59,7 +59,7 @@ def category_page(cat_id):
     categories = helpers.get_categories()  # Retrieve all categories from the database for the sidebar
 
     # Render the category page, passing the words in the category and sidebar categories to the template
-    return render_template('home.html', words=words, cat_name=cat_name, categories=categories)
+    return render_template('home.html', words=words, cat_id=cat_id, cat_name=cat_name, categories=categories)
 
 
 # /word/<word_id> (Word details page) route
@@ -92,3 +92,25 @@ def word_page(word_id):
     categories = helpers.get_categories()  # Retrieve all categories from the database for the sidebar
     # Render the word details page, passing the word and sidebar categories to the template
     return render_template('word.html', word=word, cat_name=cat_name, categories=categories)
+
+# /add_word (Add word page) route
+def add_word_page(cat_id):
+    if not helpers.user_authenticated():  # Check if the user is logged in
+        return redirect('/login')  # If not, redirect to the login page
+
+    # Check if the category id provided is valid and grab the category name
+    query = "SELECT name FROM category WHERE id = ?"  # Query to retrieve the category name
+    conn = db.create_connection(globals.DATABASE_FILE)  # Create a connection to the database
+    cur = conn.cursor()  # Create a cursor object
+    cur.execute(query, (cat_id,))  # Execute the query
+    cat_name = cur.fetchone()  # Retrieve the category name
+    conn.close()  # Close the connection
+
+    if cat_name is None:  # If the category id is invalid
+        return redirect('/?error=Category+not+found')
+    else:
+        cat_name = cat_name[0]
+
+    categories = helpers.get_categories()  # Retrieve all categories from the database for the dropdown
+
+    return render_template('add_word.html', cat_name=cat_name, categories=categories)

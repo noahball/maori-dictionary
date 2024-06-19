@@ -28,6 +28,8 @@
                     <li><a>You have student access</a></li>
                 {% elif session["user_type"] == 2 %}
                     <li><a>You have teacher access</a></li>
+                    <br>
+                    <li><a href="/add-category">Add Category</a></li>
                 {% endif %}
                 <br>
                 <li><a href="/">Home</a></li>
