@@ -34,6 +34,12 @@ def category_page(cat_id):
     if not helpers.user_authenticated():  # Check if the user is logged in
         return redirect('/login')  # If not, redirect to the login page
 
+    # Validate category id is an int
+    try:
+        cat_id = int(cat_id)
+    except ValueError:
+        return redirect('/?error=Category+ID+is+invalid.')
+
     # Check if the category id provided is valid and grab the category name
     query = "SELECT name FROM category WHERE id = ?"  # Query to retrieve the category name
     conn = db.create_connection(globals.DATABASE_FILE)  # Create a connection to the database
@@ -79,6 +85,12 @@ def word_page(word_id):
     if word is None:  # If the word id is invalid
         return redirect('/?error=Word+not+found')
 
+    # Validate word id is an int
+    try:
+        word_id = int(word_id) # Convert to int
+    except ValueError:
+        return redirect('/?=Word+ID+is+invalid.') # Redirect to the home page with an error message
+
     # Get the category name for the word
     query = "SELECT name FROM category WHERE id = ?"  # Query to retrieve the category name
     conn = db.create_connection(globals.DATABASE_FILE)  # Create a connection to the database
@@ -98,6 +110,66 @@ def add_word_page(cat_id):
     if not helpers.user_authenticated():  # Check if the user is logged in
         return redirect('/login')  # If not, redirect to the login page
 
+    if request.method == 'POST':  # If the form is submitted (POST request)
+        # Check data exists
+        if 'maori' not in request.form or 'english' not in request.form or 'definition' not in request.form or 'level' not in request.form:
+            return redirect('/add-word/' + cat_id + '?error=Please+fill+in+all+fields.') # Redirect to the add word page with an error message
+
+        # Strip all data to remove leading/trailing whitespace
+        maori = request.form['maori'].strip()
+        english = request.form['english'].strip()
+        definition = request.form['definition'].strip()
+        level = request.form['level'].strip()
+        if 'filename' in request.form: # Filename is optional
+            filename = request.form['filename'].strip()
+        else:
+            filename = None
+
+        # Check if the data is valid
+        # We are only validating length because of issues caused by macrons in the regex
+        """
+        Māori:
+        - 1-35 characters long
+        English:
+        - 1-35 characters long
+        Definition:
+        - 1-256 characters long # Increased from 35 to 256 in original database
+        
+        Filename:
+        - 1-35 characters long
+        
+        Level:
+        - Is an integer
+        
+        Category ID:
+        - Is a valid category ID and integer (we do this later)
+        """
+
+        # Validate māori, english, and definition
+        if not helpers.validate_string_length(maori, 1, 35) or not helpers.validate_string_length(english, 1, 35) or not helpers.validate_string_length(definition, 1, 256):
+            return redirect('/add-word/' + cat_id + '?error=Invalid+data+lengths.')
+
+        # Make filename none if it is empty
+        if filename == "":
+            filename = None
+            # Else validate filename if it exists
+        elif not helpers.validate_string_length(filename, 1, 35):
+            return redirect('/add-word/' + cat_id + '?error=Invalid+data+length+for+image+file.')
+
+        # Validate level
+        try :
+            level = int(level) # Convert to int
+        except ValueError: # If the level is not an integer
+            return redirect('/add-word/' + cat_id + '?error=Level must be a number.') # Redirect to the add word page with an error message
+
+    # We exit the if statement to run the following usual validation of our category id
+
+    # Validate category id is an int
+    try:
+        cat_id = int(cat_id)
+    except ValueError:
+        return redirect('/add-word/' + cat_id + '/?=Category+ID+is+invalid.')
+
     # Check if the category id provided is valid and grab the category name
     query = "SELECT name FROM category WHERE id = ?"  # Query to retrieve the category name
     conn = db.create_connection(globals.DATABASE_FILE)  # Create a connection to the database
@@ -111,6 +183,18 @@ def add_word_page(cat_id):
     else:
         cat_name = cat_name[0]
 
+    # Re-enter the if statement after our usual validation
+    if request.method == 'POST':
+        # Insert the word into the database
+        query = "INSERT INTO word (maori, english, definition, level, category, filename) VALUES (?, ?, ?, ?, ?, ?)"
+        conn = db.create_connection(globals.DATABASE_FILE)
+        cur = conn.cursor()
+        cur.execute(query, (maori, english, definition, level, cat_id, filename))
+        conn.commit()
+        conn.close()
+        return redirect('/category/' + str(cat_id) + '?error=Word+added+successfully.')
+
+
     categories = helpers.get_categories()  # Retrieve all categories from the database for the dropdown
 
-    return render_template('add_word.html', cat_name=cat_name, categories=categories)
+    return render_template('add_word.html', cat_id=cat_id, cat_name=cat_name, error=request.args.get("error"), categories=categories)

@@ -9,7 +9,7 @@
     {% if error %}
         <p>{{ error }}</p>
     {% endif %}
-    <form action="/add_word/{{ cat_id }}" method="post">
+    <form action="/add-word/{{ cat_id }}" method="post">
     <div class="dataForm">
         <p>Category</p>
         <input type="text" id="category_display" name="category_display" value="{{ cat_name }}" required disabled>
@@ -21,8 +21,8 @@
         <input type="text" id="definition" name="definition" required>
         <p>Level</p>
         <input type="text" id="level" name="level" required>
-        <p>Image File</p>
-        <input type="text" id="filename" name="filename" required>
+        <p>Image File (optional)</p>
+        <input type="text" id="filename" name="filename">
         <input type="submit" value="Add word">
     </div>
     </form>
