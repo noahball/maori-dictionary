@@ -21,6 +21,10 @@ def login_page():
         return redirect('/')  # Redirect to the home page
 
     if request.method == 'POST':  # If the form is submitted (POST request)
+        # Check data exists
+        if 'username' not in request.form or 'password' not in request.form:
+            return redirect('/login?error=Please+fill+in+all+fields.')
+
         # Strip all data to remove leading/trailing whitespace.
         # Usernames are always stored in lowercase. This is to prevent case sensitivity issues.
         username = request.form['username'].strip().lower()  # Retrieve the username from the form
@@ -86,6 +90,10 @@ def signup_page():
         return redirect('/')  # Redirect to the home page
 
     if request.method == 'POST':  # If the form is submitted (POST request)
+        # Check data exists
+        if 'name' not in request.form or 'username' not in request.form or 'password' not in request.form or 'confirm_password' not in request.form:
+            return redirect('/signup?error=Please+fill+in+all+fields.')
+
         # Strip all data to remove leading/trailing whitespace.
         name = request.form['name'].strip()  # Retrieve the user's full name from the form
         username = request.form['username'].strip().lower()  # Retrieve the username from the form
