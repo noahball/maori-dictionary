@@ -5,6 +5,11 @@
 {% block heading %}Māori - English Dictionary{% endblock %}
 
 {% block main %}
+    <h2>{{ cat_name }}</h2>
+    {% if error %}
+        <p>{{ error }}</p>
+        <br>
+    {% endif %}
     <table>
         <tr>
             <th>Image</th>
