@@ -25,8 +25,25 @@ def login_page():
         # Usernames are always stored in lowercase. This is to prevent case sensitivity issues.
         username = request.form['username'].strip().lower()  # Retrieve the username from the form
         password = request.form['password'].strip()  # Retrieve the password from the form
-        # TODO: Only retrieve necessary values from the database.
-        query = "SELECT * FROM user WHERE username = ?"  # Query to retrieve the user data from the database
+
+        # Check if the username and password are valid
+        # We do this validation here to prevent unnecessary database queries.
+        """
+        Usernames:
+        - 2-16 characters long
+        - no _ or . at the beginnning
+        - no __ or _. or ._ or .. inside
+        - can contain a-z, A-Z, 0-9, _ and .
+        - no _ or . at the end
+        
+        Passwords:
+        - must be between eight and 64 characters long
+        - must contain at least one letter and one number
+        """
+        if helpers.validate_string_regex(username, r'^(?=.{2,16}$)(?![_.])(?!.*[_.]{2})[a-zA-Z0-9._]+(?<![_.])$') is False or helpers.validate_string_regex(password, r'^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,64}$') is False:
+            return redirect('/login?error=Invalid+username+or+password')
+
+        query = "SELECT id, name, username, password, type FROM user WHERE username = ?"  # Query to retrieve the user data from the database
         conn = db.create_connection(globals.DATABASE_FILE)  # Create a connection to the database
         cur = conn.cursor()  # Create a cursor object
         cur.execute(query, (username,))  # Execute the query
@@ -74,6 +91,41 @@ def signup_page():
         username = request.form['username'].strip().lower()  # Retrieve the username from the form
         password = request.form['password'].strip()  # Retrieve the password from the form
         confirm_password = request.form['confirm_password'].strip()  # Retrieve the password confirmation from the form
+
+        # Check if the name, username, password, and password confirmation are valid
+        # We do this validation here to prevent unnecessary database queries.
+        """
+        Names:
+        - 2-30 characters long
+        - accept a-z, A-Z, and spaces
+        - accept , . ' - characters
+        - no leading or trailing spaces
+        
+        Usernames:
+        - 2-16 characters long
+        - no _ or . at the beginnning
+        - no __ or _. or ._ or .. inside
+        - can contain a-z, A-Z, 0-9, _ and .
+        - no _ or . at the end
+
+        Passwords:
+        - must be between eight and 64 characters long
+        - must contain at least one letter and one number
+        """
+
+        # We will validate separately for each field to provide more specific error messages.
+
+        # Validate the name
+        if helpers.validate_string_regex(name, r'^[a-zA-Z ,.\'-]+$') is False:
+            return redirect('/signup?error=Invalid+name.+Please+use+only+letters+and+spaces.')
+
+        # Validate the username
+        if helpers.validate_string_regex(username, r'^(?=.{2,16}$)(?![_.])(?!.*[_.]{2})[a-zA-Z0-9._]+(?<![_.])$') is False:
+            return redirect('/login?error=Invalid+username.+Please+use+2-16+characters+with+only+letters,+numbers,+_+and+.')
+
+        # Validate the password
+        if helpers.validate_string_regex(password, r'^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,64}$') is False:
+            return redirect('/signup?error=Invalid+password.+Please+use+8-64+characters+with+at+least+one+letter+and+one+number.')
 
         # Check if the two passwords match
         if password != confirm_password:  # If the passwords do not match
