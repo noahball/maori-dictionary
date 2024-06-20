@@ -13,6 +13,10 @@
         <p>Category: {{ cat_name }}</p>
     </div>
     <div>
+    <br>
+     <a href="/delete-word/{{ word[0] }}"><button class="add-button">Delete word</button></a>
+    </div>
+    <div>
     <img style="max-height: 400px; max-width: 400px; padding-top: 1rem" src="/static/images/{{ word[6] or "noimage.jpg" }}" alt="{{ word[2] }}">
     </div>
 {% endblock %}

@@ -65,7 +65,7 @@ def category_page(cat_id):
     categories = helpers.get_categories()  # Retrieve all categories from the database for the sidebar
 
     # Render the category page, passing the words in the category and sidebar categories to the template
-    return render_template('home.html', words=words, cat_id=cat_id, cat_name=cat_name, categories=categories)
+    return render_template('home.html', words=words, cat_id=cat_id, cat_name=cat_name, error=request.args.get("message"), categories=categories)
 
 
 # /word/<word_id> (Word details page) route
@@ -192,9 +192,53 @@ def add_word_page(cat_id):
         cur.execute(query, (maori, english, definition, level, cat_id, filename))
         conn.commit()
         conn.close()
-        return redirect('/category/' + str(cat_id) + '?error=Word+added+successfully.')
+        return redirect('/category/' + str(cat_id) + '?message=Word+added+successfully.')
 
 
     categories = helpers.get_categories()  # Retrieve all categories from the database for the dropdown
 
     return render_template('add_word.html', cat_id=cat_id, cat_name=cat_name, error=request.args.get("error"), categories=categories)
+
+# /delete_word/<word_id> (Delete word page) route
+def delete_word_page(word_id):
+    if not helpers.user_authenticated():  # Check if the user is logged in
+        return redirect('/login')  # If not, redirect to the login page
+
+    # Validate word id is an int
+    try:
+        word_id = int(word_id)
+    except ValueError:
+        return redirect('/?error=Word+ID+is+invalid.')
+
+    # Check if the word id provided is valid
+    query = "SELECT english FROM word WHERE id = ?"  # Query to retrieve the word id
+    conn = db.create_connection(globals.DATABASE_FILE)  # Create a connection to the database
+    cur = conn.cursor()  # Create a cursor object
+    cur.execute(query, (word_id,))  # Execute the query
+    word_english = cur.fetchone()  # Retrieve the word id
+    conn.close()  # Close the connection
+
+    if word_english is None:  # If the word id is invalid
+        return redirect('/?error=Word+not+found')  # Redirect to the home page with an error message
+    else:
+        word_english = word_english[0]
+
+    # We are doing this further down because we use the same validation as a GET request
+    if request.method == 'POST':  # If the form is submitted (POST request)
+        # Check data exists
+        if 'confirm' not in request.form or request.form['confirm'] != 'yes':
+            return redirect('/delete-word/' + str(word_id) + '?error=Please+tick+the+box+to+confirm+deletion.')
+
+        # Delete the word from the database
+        query = "DELETE FROM word WHERE id = ?"
+        conn = db.create_connection(globals.DATABASE_FILE)
+        cur = conn.cursor()
+        cur.execute(query, (word_id,))
+        conn.commit()
+        conn.close()
+        return redirect('/?error=' + word_english + '+deleted+successfully.')
+
+    categories = helpers.get_categories()  # Retrieve all categories from the database for the sidebar
+
+    # Render the delete word page with the necessary parameters
+    return render_template('delete_word.html', word_id=word_id, word_english=word_english, error=request.args.get("error"), categories=categories)

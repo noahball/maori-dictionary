@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block title %}Māori Dictionary | Delete Word{% endblock %}
+
+{% block heading %}Māori - English Dictionary{% endblock %}
+
+{% block main %}
+    <h2>Are you sure you want to delete "{{ word_english }}"?</h2>
+    {% if error %}
+        <p>{{ error }}</p>
+    {% endif %}
+    <form action="/delete-word/{{ word_id }}" method="post">
+    <div class="dataForm" style="text-align: center">
+        <p>This action is irreversible!</p>
+        <div style="display: flex; justify-content: center; margin-bottom: 0.5rem">
+            <input type="checkbox" name="confirm" value="yes" style="width: 40px;">
+            <p>Yes, I want to delete "{{ word_english }}"</p>
+        </div>
+        <input type="submit" value="Confirm Deletion">
+    </div>
+    </form>
+{% endblock %}
