@@ -47,7 +47,7 @@ def category_page(cat_id):
     # So let's check if the category id provided is valid and grab the category name
     cat_name = helpers.cat_id_to_name(cat_id, categories)
 
-    if cat_name is None:  # If the category id is invalid
+    if cat_name is None or cat_name is "Unknown":  # If the category id is invalid
         return redirect('/?message=Category+not+found')  # Redirect to the home page
 
     # Retrieve all words from the database that match the category id provided
@@ -89,7 +89,7 @@ def word_page(word_id):
     # Check if the category id provided is valid and grab the category name
     cat_name = helpers.cat_id_to_name(word[5], categories)
 
-    if cat_name is None:  # If the category id is invalid
+    if cat_name is None or cat_name is "Unknown":  # If the category id is invalid
         return redirect('/?message=Category+for+word+not+found')  # Redirect to the home page with an error message
 
     # Get the user who added the word
@@ -136,7 +136,7 @@ def add_word_page(cat_id):
     cat_name = helpers.cat_id_to_name(cat_id,
                                       categories)  # Check if the category id provided is valid and grab the category name
 
-    if cat_name is None:  # If the category id is invalid
+    if cat_name is None or cat_name is "Unknown":  # If the category id is invalid
         return redirect('/?message=Category+not+found')  # Redirect to the home page with an error message
 
     if request.method == 'POST':  # If the form is submitted (POST request)
@@ -165,7 +165,7 @@ def add_word_page(cat_id):
         - 1-256 characters long # Increased from 35 to 256 in original database
         
         Filename:
-        - 1-35 characters long
+        - 1-35 characters long (if exists)
         
         Level:
         - Is an integer
