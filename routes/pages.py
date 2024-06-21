@@ -228,3 +228,57 @@ def delete_word_page(word_id):
 
     # Render the delete word page with the necessary parameters
     return render_template('delete_word.html', word_id=word_id, word_english=word_english, error=request.args.get("error"), categories=categories)
+
+# /manage_users (Manage users page) route
+def manage_users_page():
+    if not helpers.user_authenticated():  # Check if the user is logged in
+        return redirect('/login')  # If not, redirect to the login page
+
+    if session['user_type'] != 2:  # Check if the user is a teacher
+        return redirect('/?error=You+do+not+have+permission+to+manage+users.')  # If not, redirect to the home page with an error message
+
+    if request.method == 'POST':
+        if 'user_id' not in request.form or 'user_type' not in request.form: # Check that the user id and user type are provided (required)
+            return redirect('/manage-users?error=Please+select+a+user+and+user+type.')
+
+        user_id = request.form['user_id'] # Retrieve the user id and user type from the form
+        user_type = request.form['user_type']
+
+        try: # Check that the user id and user type are integers (verifying data)
+            user_id = int(user_id)
+            user_type = int(user_type)
+        except ValueError:
+            return redirect('/manage-users?error=Invalid+user+ID+or+user+type.')
+
+        if user_type not in [1, 2]: # If user type is not 1 or 2 (student/teacher)
+            return redirect('/manage-users?error=Invalid+user+type.')
+
+        if user_id == session['user_id']: # If the user is trying to change their own type
+            return redirect('/manage-users?error=You+cannot+change+your+own+type')
+
+        # Check if user exists
+        user_data = db.run_query("SELECT id FROM user WHERE id = ?", (user_id,), False, False)
+
+        if user_data is None: # If the user does not exist
+            return redirect('/manage-users?error=User+not+found.')
+
+        db.run_query("UPDATE user SET type = ? WHERE id = ?", (user_type, user_id), False, True)
+        return redirect('/manage-users?error=User+type+updated+successfully.++Changes+will+take+effect+on+next+login.')
+
+    # Retrieve all users from the database
+    users = db.run_query("SELECT id, name, username, type FROM user", (), True, False)
+
+    # Add user type string to each user tuple
+    for i in range(len(users)):
+        if users[i][3] == 1:
+            users[i] = users[i] + ("Student",)
+        elif users[i][3] == 2:
+            users[i] = users[i] + ("Teacher",)
+        else:
+            users[i] = users[i] + ("Unknown",)
+
+    # Get categories for the sidebar
+    categories = helpers.get_categories()
+
+    # Render the manage users page, passing the users to the template
+    return render_template('manage_users.html', users=users, error=request.args.get("error"), categories=categories)

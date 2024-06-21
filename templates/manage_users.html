@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block title %}Māori Dictionary | Manage Users{% endblock %}
+
+{% block heading %}Māori - English Dictionary{% endblock %}
+
+{% block main %}
+    <h2>Manage Users</h2>
+    {% if error %}
+        <p>{{ error }}</p>
+    {% endif %}
+    <form action="/manage-users" method="post">
+    <div class="dataForm">
+        <p>Select User</p>
+        <select name="user_id" id="user_id" required>
+            {% for user in users %}
+                <option value="{{ user[0]|string }}">{{ user[4] }}: {{ user[1] }} ({{ user[2] }})</option>
+            {% endfor %}
+        </select>
+        <p style="margin-top: 0.5rem">Select New Role</p>
+        <div style="display: flex; justify-content: center; margin-bottom: 0.5rem">
+            <p>Student</p>
+            <input type="radio" id="role" name="user_type" value="1" required>
+            <p>Teacher</p>
+            <input type="radio" id="role" name="user_type" value="2" required>
+        </div>
+        <input type="submit" value="Update User">
+    </div>
+    </form>
+{% endblock %}
