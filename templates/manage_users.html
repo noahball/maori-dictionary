@@ -14,7 +14,7 @@
         <p>Select User</p>
         <select name="user_id" id="user_id" required>
             {% for user in users %}
-                <option value="{{ user[0]|string }}">{{ user[4] }}: {{ user[1] }} ({{ user[2] }})</option>
+                <option value="{{ user[0]|string }}">{{ user[1] }} - {{ user[2] }} ({{ user[4] }})</option>
             {% endfor %}
         </select>
         <p style="margin-top: 0.5rem">Select New Role</p>

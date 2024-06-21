@@ -25,7 +25,8 @@ def home_page():
     words = helpers.get_category_names(words, categories)  # Add the category name to each word tuple
 
     # Render the home page, passing the words and categories to the template
-    return render_template('home.html', words=words, categories=categories, session=session, error=request.args.get("error"), cat_name="All Words")
+    return render_template('home.html', words=words, categories=categories, session=session,
+                           error=request.args.get("error"), cat_name="All Words")
 
 
 # /category/<cat_id> (Category page) route
@@ -50,12 +51,15 @@ def category_page(cat_id):
         return redirect('/?error=Category+not+found')  # Redirect to the home page
 
     # Retrieve all words from the database that match the category id provided
-    words = db.run_query("SELECT id, maori, english, definition, level, category, filename FROM word WHERE category = ?", (cat_id,), True, False)
+    words = db.run_query(
+        "SELECT id, maori, english, definition, level, category, filename FROM word WHERE category = ?", (cat_id,),
+        True, False)
 
     words = helpers.get_category_names(words, categories)  # Add the category name to each word tuple
 
     # Render the category page, passing the words in the category and sidebar categories to the template
-    return render_template('home.html', words=words, cat_id=cat_id, cat_name=cat_name, error=request.args.get("message"), categories=categories)
+    return render_template('home.html', words=words, cat_id=cat_id, cat_name=cat_name,
+                           error=request.args.get("message"), categories=categories)
 
 
 # /word/<word_id> (Word details page) route
@@ -65,13 +69,15 @@ def word_page(word_id):
 
     # Validate word id is an int
     try:
-        word_id = int(word_id) # Convert to int
+        word_id = int(word_id)  # Convert to int
     except ValueError:
-        return redirect('/?=Word+ID+is+invalid.') # Redirect to the home page with an error message
+        return redirect('/?=Word+ID+is+invalid.')  # Redirect to the home page with an error message
 
     # Retrieve the word from the database that matches the word id provided
     # Query to retrieve a single word
-    word = db.run_query("SELECT id, maori, english, definition, level, category, filename, added_by, added_time FROM word WHERE id = ?", (word_id,), False, False)
+    word = db.run_query(
+        "SELECT id, maori, english, definition, level, category, filename, added_by, added_time FROM word WHERE id = ?",
+        (word_id,), False, False)
 
     if word is None:  # If the word id is invalid
         return redirect('/?error=Word+not+found')  # Redirect to the home page with an error message
@@ -83,8 +89,8 @@ def word_page(word_id):
     # Check if the category id provided is valid and grab the category name
     cat_name = helpers.cat_id_to_name(word[5], categories)
 
-    if cat_name is None: # If the category id is invalid
-        return redirect('/?error=Category+for+word+not+found') # Redirect to the home page with an error message
+    if cat_name is None:  # If the category id is invalid
+        return redirect('/?error=Category+for+word+not+found')  # Redirect to the home page with an error message
 
     # Get the user who added the word
     added_by = db.run_query("SELECT name FROM user WHERE id = ?", (word[7],), False, False)
@@ -99,13 +105,15 @@ def word_page(word_id):
     # in the try block anyway.
     try:
         time_added_obj = datetime.fromtimestamp(word[8], local_timezone)  # Convert the timestamp to a datetime object
-        readable_time = time_added_obj.strftime("%d/%m/%Y %H:%M:%S")  # Convert the datetime object to a human-readable format
+        readable_time = time_added_obj.strftime(
+            "%d/%m/%Y %H:%M:%S")  # Convert the datetime object to a human-readable format
         word += (readable_time,)  # Add the human-readable time to the word tuple
     except:
         word += ("Unknown",)  # If the time is not found, add "Unknown" to the word tuple
 
     # Render the word details page, passing the word and sidebar categories to the template
     return render_template('word.html', word=word, cat_name=cat_name, categories=categories)
+
 
 # /add_word/<cat_id> (Add word page) route
 def add_word_page(cat_id):
@@ -125,7 +133,8 @@ def add_word_page(cat_id):
     categories = helpers.get_categories()  # Retrieve all categories from the database
     # We need to get all categories for the sidebar anyway, so we do it here and save ourselves an extra database query
 
-    cat_name = helpers.cat_id_to_name(cat_id, categories)  # Check if the category id provided is valid and grab the category name
+    cat_name = helpers.cat_id_to_name(cat_id,
+                                      categories)  # Check if the category id provided is valid and grab the category name
 
     if cat_name is None:  # If the category id is invalid
         return redirect('/?error=Category+not+found')  # Redirect to the home page with an error message
@@ -133,14 +142,15 @@ def add_word_page(cat_id):
     if request.method == 'POST':  # If the form is submitted (POST request)
         # Check data exists
         if 'maori' not in request.form or 'english' not in request.form or 'definition' not in request.form or 'level' not in request.form:
-            return redirect('/add-word/' + cat_id + '?error=Please+fill+in+all+fields.') # Redirect to the add word page with an error message
+            return redirect(
+                '/add-word/' + cat_id + '?error=Please+fill+in+all+fields.')  # Redirect to the add word page with an error message
 
         # Strip all data to remove leading/trailing whitespace
         maori = request.form['maori'].strip()
         english = request.form['english'].strip()
         definition = request.form['definition'].strip()
         level = request.form['level'].strip()
-        if 'filename' in request.form: # Filename is optional
+        if 'filename' in request.form:  # Filename is optional
             filename = request.form['filename'].strip()
         else:
             filename = None
@@ -166,7 +176,9 @@ def add_word_page(cat_id):
         """
 
         # Validate māori, english, and definition
-        if not helpers.validate_string_length(maori, 1, 35) or not helpers.validate_string_length(english, 1, 35) or not helpers.validate_string_length(definition, 1, 256):
+        if not helpers.validate_string_length(maori, 1, 35) or not helpers.validate_string_length(english, 1,
+                                                                                                  35) or not helpers.validate_string_length(
+                definition, 1, 256):
             return redirect('/add-word/' + cat_id + '?error=Invalid+data+lengths.')
 
         # Make filename none if it is empty
@@ -177,20 +189,25 @@ def add_word_page(cat_id):
             return redirect('/add-word/' + cat_id + '?error=Invalid+data+length+for+image+file.')
 
         # Validate level
-        try :
-            level = int(level) # Convert to int
-        except ValueError: # If the level is not an integer
-            return redirect('/add-word/' + cat_id + '?error=Level must be a number.') # Redirect to the add word page with an error message
+        try:
+            level = int(level)  # Convert to int
+        except ValueError:  # If the level is not an integer
+            return redirect(
+                '/add-word/' + cat_id + '?error=Level must be a number.')  # Redirect to the add word page with an error message
 
         added_by = session['user_id']  # Retrieve the user id from the session
-        added_time = int(round(datetime.now().timestamp())) # Get the current time in seconds since the unix epoch.
+        added_time = int(round(datetime.now().timestamp()))  # Get the current time in seconds since the unix epoch.
         # We round it and convert to an int because we don't need the milliseconds.
 
         # Insert the word into the database
-        db.run_query("INSERT INTO word (maori, english, definition, level, category, filename, added_by, added_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", (maori, english, definition, level, cat_id, filename, added_by, added_time), False, True)
+        db.run_query(
+            "INSERT INTO word (maori, english, definition, level, category, filename, added_by, added_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+            (maori, english, definition, level, cat_id, filename, added_by, added_time), False, True)
         return redirect('/category/' + str(cat_id) + '?message=Word+added+successfully.')
 
-    return render_template('add_word.html', cat_id=cat_id, cat_name=cat_name, error=request.args.get("error"), categories=categories)
+    return render_template('add_word.html', cat_id=cat_id, cat_name=cat_name, error=request.args.get("error"),
+                           categories=categories)
+
 
 # /delete_word/<word_id> (Delete word page) route
 def delete_word_page(word_id):
@@ -227,40 +244,47 @@ def delete_word_page(word_id):
     categories = helpers.get_categories()  # Retrieve all categories from the database for the sidebar
 
     # Render the delete word page with the necessary parameters
-    return render_template('delete_word.html', word_id=word_id, word_english=word_english, error=request.args.get("error"), categories=categories)
+    return render_template('delete_word.html', word_id=word_id, word_english=word_english,
+                           error=request.args.get("error"), categories=categories)
 
-# /manage_users (Manage users page) route
+
+# /manage-users (Manage users page) route
 def manage_users_page():
     if not helpers.user_authenticated():  # Check if the user is logged in
         return redirect('/login')  # If not, redirect to the login page
 
     if session['user_type'] != 2:  # Check if the user is a teacher
-        return redirect('/?error=You+do+not+have+permission+to+manage+users.')  # If not, redirect to the home page with an error message
+        return redirect(
+            '/?error=You+do+not+have+permission+to+manage+users.')  # If not, redirect to the home page with an error message
 
     if request.method == 'POST':
-        if 'user_id' not in request.form or 'user_type' not in request.form: # Check that the user id and user type are provided (required)
+        if 'user_id' not in request.form or 'user_type' not in request.form:  # Check that the user id and user type are provided (required)
             return redirect('/manage-users?error=Please+select+a+user+and+user+type.')
 
-        user_id = request.form['user_id'] # Retrieve the user id and user type from the form
+        user_id = request.form['user_id']  # Retrieve the user id and user type from the form
         user_type = request.form['user_type']
 
-        try: # Check that the user id and user type are integers (verifying data)
+        try:  # Check that the user id and user type are integers (verifying data)
             user_id = int(user_id)
             user_type = int(user_type)
         except ValueError:
             return redirect('/manage-users?error=Invalid+user+ID+or+user+type.')
 
-        if user_type not in [1, 2]: # If user type is not 1 or 2 (student/teacher)
+        if user_type not in [1, 2]:  # If user type is not 1 or 2 (student/teacher)
             return redirect('/manage-users?error=Invalid+user+type.')
 
-        if user_id == session['user_id']: # If the user is trying to change their own type
+        if user_id == session['user_id']:  # If the user is trying to change their own type
             return redirect('/manage-users?error=You+cannot+change+your+own+type')
 
         # Check if user exists
-        user_data = db.run_query("SELECT id FROM user WHERE id = ?", (user_id,), False, False)
+        user_data = db.run_query("SELECT id, type FROM user WHERE id = ?", (user_id,), False, False)
 
-        if user_data is None: # If the user does not exist
+        if user_data is None:  # If the user does not exist
             return redirect('/manage-users?error=User+not+found.')
+
+        # Check if updating to the same type
+        if user_data[1] == user_type:
+            return redirect('/manage-users?error=User+type+is+already+set+to+that+value.')
 
         db.run_query("UPDATE user SET type = ? WHERE id = ?", (user_type, user_id), False, True)
         return redirect('/manage-users?error=User+type+updated+successfully.++Changes+will+take+effect+on+next+login.')
