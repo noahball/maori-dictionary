@@ -16,8 +16,10 @@
         <p>Added on: {{ word[10] }}</p>
     </div>
     <div>
+    {% if session["user_type"] == 2 %}
     <br>
-     <a href="/delete-word/{{ word[0] }}"><button class="add-button">Delete word</button></a>
+        <a href="/delete-word/{{ word[0] }}"><button class="add-button">Delete word</button></a>
+    {% endif %}
     </div>
     <div>
     <img style="max-height: 400px; max-width: 400px; padding-top: 1rem" src="/static/images/{{ word[6] or "noimage.jpg" }}" alt="{{ word[2] }}">

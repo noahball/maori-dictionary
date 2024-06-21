@@ -112,6 +112,9 @@ def add_word_page(cat_id):
     if not helpers.user_authenticated():  # Check if the user is logged in
         return redirect('/login')  # If not, redirect to the login page
 
+    if session['user_type'] != 2:
+        return redirect('/?error=You+do+not+have+permission+to+add+words.')
+
     # We do this validation for both GET and POST requests, so that's why this is here
     # Validate category id is an int
     try:
@@ -193,6 +196,9 @@ def add_word_page(cat_id):
 def delete_word_page(word_id):
     if not helpers.user_authenticated():  # Check if the user is logged in
         return redirect('/login')  # If not, redirect to the login page
+
+    if session['user_type'] != 2:
+        return redirect('/?error=You+do+not+have+permission+to+delete+words.')
 
     # Validate word id is an int
     try:
