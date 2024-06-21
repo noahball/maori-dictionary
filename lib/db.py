@@ -1,7 +1,7 @@
 """
 db.py
 Noah Ball, June 2024
-This file contains the function used to connect to the databse.
+This file contains the function used to connect to the database and to run queries.
 """
 
 # Importing the necessary modules

@@ -87,4 +87,6 @@ def cat_id_to_name(cat_id: int, categories: tuple):
     for i in range(len(categories)): # For each category
         if categories[i][0] == cat_id: # If the category ID matches
             return categories[i][1] # Return the category name
-    return "Unknown" # If the category ID is not found, return "Unknown"
+    return "Unknown" # If the category ID is not found, return "Unknown".
+    # We only use this for displaying the name to the user, so returning Unknown instead of None is fine.
+    # ... and this means less manipulation later on.

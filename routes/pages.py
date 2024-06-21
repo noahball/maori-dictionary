@@ -39,7 +39,9 @@ def category_page(cat_id):
 
     # We need to get all categories for the sidebar anyway, so we do it here and save ourselves an extra database query
     categories = helpers.get_categories()  # Retrieve all categories from the database
-    # Check if the category id provided is valid and grab the category name
+    # We then slim this down just to the category name for the category we are viewing.
+    # But we still have the full categories tuple for the sidebar later on.
+    # So let's check if the category id provided is valid and grab the category name
     cat_name = helpers.cat_id_to_name(cat_id, categories)
 
     if cat_name is None:  # If the category id is invalid
