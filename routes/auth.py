@@ -98,7 +98,6 @@ def signup_page():
         - 2-30 characters long
         - accept a-z, A-Z, and spaces
         - accept , . ' - characters
-        - no leading or trailing spaces
         
         Usernames:
         - 2-16 characters long
@@ -115,8 +114,8 @@ def signup_page():
         # We will validate separately for each field to provide more specific error messages.
 
         # Validate the name
-        if helpers.validate_string_regex(name, r'^[a-zA-Z ,.\'-]+$') is False:
-            return redirect('/signup?message=Invalid+name.+Please+use+only+letters+and+spaces.')
+        if helpers.validate_string_regex(name, r'^[a-zA-Z ,.\'-]{2,30}$') is False:
+            return redirect('/signup?message=Invalid+name.+Please+use+only+letters+and+spaces+with+one+to+thirty+characters.')
 
         # Validate the username
         if helpers.validate_string_regex(username, r'^(?=.{2,16}$)(?![_.])(?!.*[_.]{2})[a-zA-Z0-9._]+(?<![_.])$') is False:
