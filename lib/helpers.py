@@ -17,12 +17,7 @@ def get_categories():
     Returns:
         A list of all categories in the categories table
     """
-    query = "SELECT id, name FROM category"
-    conn = db.create_connection(globals.DATABASE_FILE)
-    cur = conn.cursor()
-    cur.execute(query)
-    categories = cur.fetchall()
-    conn.close()
+    categories = db.run_query("SELECT id, name FROM category", (), True, False)
     return categories
 
 
