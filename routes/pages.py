@@ -183,8 +183,8 @@ def add_word_page(cat_id):
             return redirect('/add-word/' + cat_id + '?error=Level must be a number.') # Redirect to the add word page with an error message
 
         added_by = session['user_id']  # Retrieve the user id from the session
-        added_time = int(round(datetime.now().timestamp())) # Get the current time in seconds since the epoch.
-        # We round it because we don't need the milliseconds.
+        added_time = int(round(datetime.now().timestamp())) # Get the current time in seconds since the unix epoch.
+        # We round it and convert to an int because we don't need the milliseconds.
 
         # Insert the word into the database
         db.run_query("INSERT INTO word (maori, english, definition, level, category, filename, added_by, added_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", (maori, english, definition, level, cat_id, filename, added_by, added_time), False, True)

@@ -124,7 +124,7 @@ def signup_page():
 
         # Validate the username
         if helpers.validate_string_regex(username, r'^(?=.{2,16}$)(?![_.])(?!.*[_.]{2})[a-zA-Z0-9._]+(?<![_.])$') is False:
-            return redirect('/login?error=Invalid+username.+Please+use+2-16+characters+with+only+letters,+numbers,+_+and+.')
+            return redirect('/signup?error=Invalid+username.+Please+use+2-16+characters+with+only+letters,+numbers,+_+and+.')
 
         # Validate the password
         if helpers.validate_string_regex(password, r'^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,64}$') is False:
