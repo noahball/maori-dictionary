@@ -5,6 +5,7 @@ NCEA Level 3 Digital Technologies Assignment - AS91902 &amp; AS91906
 - Python 3.12+
 - Flask 3.0.2+
 - Python Dotenv 1.0.1+
+- tzlocal 5.2+
 
 ## Installation
 ```pip install -r requirements.txt```
