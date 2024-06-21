@@ -6,8 +6,8 @@
 
 {% block main %}
     <h2>Log in to your account</h2>
-    {% if error %}
-        <p>{{ error }}</p>
+    {% if message %}
+        <p>{{ message }}</p>
     {% endif %}
     <form action="/login" method="post">
     <div class="dataForm">

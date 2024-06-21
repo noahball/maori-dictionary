@@ -19,7 +19,7 @@ def login_page():
     if request.method == 'POST':  # If the form is submitted (POST request)
         # Check data exists
         if 'username' not in request.form or 'password' not in request.form:
-            return redirect('/login?error=Please+fill+in+all+fields.')
+            return redirect('/login?message=Please+fill+in+all+fields.')
 
         # Strip all data to remove leading/trailing whitespace.
         # Usernames are always stored in lowercase. This is to prevent case sensitivity issues.
@@ -41,13 +41,13 @@ def login_page():
         - must contain at least one letter and one number
         """
         if helpers.validate_string_regex(username, r'^(?=.{2,16}$)(?![_.])(?!.*[_.]{2})[a-zA-Z0-9._]+(?<![_.])$') is False or helpers.validate_string_regex(password, r'^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,64}$') is False:
-            return redirect('/login?error=Invalid+username+or+password')
+            return redirect('/login?message=Invalid+username+or+password')
 
         user_data = db.run_query("SELECT id, name, username, password, type FROM user WHERE username = ?", (username,), False, False)  # Retrieve the user data from the database
 
         if user_data is None:  # If the user does not exist
             return redirect(
-                '/login?error=Invalid+username+or+password')  # Redirect to the login page with an error message
+                '/login?message=Invalid+username+or+password')  # Redirect to the login page with an error message
 
         try:  # Try to retrieve the user data
             user_id = user_data[0]  # Retrieve the user id
@@ -57,11 +57,11 @@ def login_page():
             user_type = user_data[4]  # Retrieve the user type
         except IndexError:  # If the user data is not in the correct format/not found
             return redirect(
-                '/login?error=Invalid+username+or+password')  # Redirect to the login page with an error message
+                '/login?message=Invalid+username+or+password')  # Redirect to the login page with an error message
 
         if not bcrypt.check_password_hash(db_password, password):  # Check if the password is correct, if incorrect...
             return redirect(
-                '/login?error=Invalid+username+or+password')  # Redirect to the login page with an error message
+                '/login?message=Invalid+username+or+password')  # Redirect to the login page with an error message
 
         # Store the user data in the session
         session['user_id'] = user_id  # Store the user id
@@ -72,7 +72,7 @@ def login_page():
         return redirect('/')  # Redirect to the home page
 
     return render_template('login.html',
-                           error=request.args.get('error'))  # Render the login page with an error message if present
+                           message=request.args.get('message'))  # Render the login page with an error message if present
 
 
 # /signup (Sign Up Page) route
@@ -83,7 +83,7 @@ def signup_page():
     if request.method == 'POST':  # If the form is submitted (POST request)
         # Check data exists
         if 'name' not in request.form or 'username' not in request.form or 'password' not in request.form or 'confirm_password' not in request.form:
-            return redirect('/signup?error=Please+fill+in+all+fields.')
+            return redirect('/signup?message=Please+fill+in+all+fields.')
 
         # Strip all data to remove leading/trailing whitespace.
         name = request.form['name'].strip()  # Retrieve the user's full name from the form
@@ -116,20 +116,20 @@ def signup_page():
 
         # Validate the name
         if helpers.validate_string_regex(name, r'^[a-zA-Z ,.\'-]+$') is False:
-            return redirect('/signup?error=Invalid+name.+Please+use+only+letters+and+spaces.')
+            return redirect('/signup?message=Invalid+name.+Please+use+only+letters+and+spaces.')
 
         # Validate the username
         if helpers.validate_string_regex(username, r'^(?=.{2,16}$)(?![_.])(?!.*[_.]{2})[a-zA-Z0-9._]+(?<![_.])$') is False:
-            return redirect('/signup?error=Invalid+username.+Please+use+2-16+characters+with+only+letters,+numbers,+_+and+.')
+            return redirect('/signup?message=Invalid+username.+Please+use+2-16+characters+with+only+letters,+numbers,+_+and+.')
 
         # Validate the password
         if helpers.validate_string_regex(password, r'^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,64}$') is False:
-            return redirect('/signup?error=Invalid+password.+Please+use+8-64+characters+with+at+least+one+letter+and+one+number.')
+            return redirect('/signup?message=Invalid+password.+Please+use+8-64+characters+with+at+least+one+letter+and+one+number.')
 
         # Check if the two passwords match
         if password != confirm_password:  # If the passwords do not match
             return redirect(
-                '/signup?error=Passwords+do+not+match')  # Redirect to the sign up page with an error message
+                '/signup?message=Passwords+do+not+match')  # Redirect to the sign up page with an error message
 
         # Hash the password using Bcrypt
         hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
@@ -139,7 +139,7 @@ def signup_page():
 
         if user_data is not None:  # If the user already exists
             return redirect(
-                '/signup?error=Username+is+already+taken')  # Redirect to the sign up page with an error message
+                '/signup?message=Username+is+already+taken')  # Redirect to the sign up page with an error message
 
         # Insert the new user into the database
         db.run_query("INSERT INTO user (name, username, password, type) VALUES (?, ?, ?, ?)", (name, username, hashed_password, 1), False, True)
@@ -149,7 +149,7 @@ def signup_page():
         return redirect('/login')  # Redirect to the login page
 
     return render_template('signup.html',
-                           error=request.args.get('error'))  # Render the sign up page with an error message if present
+                           message=request.args.get('message'))  # Render the sign up page with an error message if present
 
 
 # /logout (Log Out Page) route

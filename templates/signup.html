@@ -6,8 +6,8 @@
 
 {% block main %}
     <h2>Sign up for an account</h2>
-    {% if error %}
-        <p>{{ error }}</p>
+    {% if message %}
+        <p>{{ message }}</p>
     {% endif %}
     <form action="/signup" method="post">
     <div class="dataForm">

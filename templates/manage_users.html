@@ -6,8 +6,8 @@
 
 {% block main %}
     <h2>Manage Users</h2>
-    {% if error %}
-        <p>{{ error }}</p>
+    {% if message %}
+        <p>{{ message }}</p>
     {% endif %}
     <form action="/manage-users" method="post">
     <div class="dataForm">

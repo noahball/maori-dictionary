@@ -6,8 +6,8 @@
 
 {% block main %}
     <h2>Are you sure you want to delete "{{ word_english }}"?</h2>
-    {% if error %}
-        <p>{{ error }}</p>
+    {% if message %}
+        <p>{{ message }}</p>
     {% endif %}
     <form action="/delete-word/{{ word_id }}" method="post">
     <div class="dataForm" style="text-align: center">

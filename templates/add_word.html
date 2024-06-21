@@ -6,8 +6,8 @@
 
 {% block main %}
     <h2>Add a word to {{ cat_name }}</h2>
-    {% if error %}
-        <p>{{ error }}</p>
+    {% if message %}
+        <p>{{ message }}</p>
     {% endif %}
     <form action="/add-word/{{ cat_id }}" method="post">
     <div class="dataForm">
