@@ -18,8 +18,10 @@ def home_page():
 
     # Retrieve all words from the database
     words = db.run_query("SELECT id, maori, english, definition, level, category, filename FROM word", (), True, False)
+    categories = helpers.get_categories()  # Retrieve all categories from the database
 
-    categories = helpers.get_categories()  # Retrieve all categories from the database for the sidebar
+    words = helpers.get_category_names(words, categories)  # Add the category name to each word tuple
+
     # Render the home page, passing the words and categories to the template
     return render_template('home.html', words=words, categories=categories, session=session, error=request.args.get("error"), cat_name="All Words")
 
@@ -35,18 +37,18 @@ def category_page(cat_id):
     except ValueError:
         return redirect('/?error=Category+ID+is+invalid.')
 
+    # We need to get all categories for the sidebar anyway, so we do it here and save ourselves an extra database query
+    categories = helpers.get_categories()  # Retrieve all categories from the database
     # Check if the category id provided is valid and grab the category name
-    cat_name = db.run_query("SELECT name FROM category WHERE id = ?", (cat_id,), False, False)
+    cat_name = helpers.cat_id_to_name(cat_id, categories)
 
     if cat_name is None:  # If the category id is invalid
         return redirect('/?error=Category+not+found')  # Redirect to the home page
-    else:
-        cat_name = cat_name[0] # Retrieve the category name from the tuple
 
     # Retrieve all words from the database that match the category id provided
     words = db.run_query("SELECT id, maori, english, definition, level, category, filename FROM word WHERE category = ?", (cat_id,), True, False)
 
-    categories = helpers.get_categories()  # Retrieve all categories from the database for the sidebar
+    words = helpers.get_category_names(words, categories)  # Add the category name to each word tuple
 
     # Render the category page, passing the words in the category and sidebar categories to the template
     return render_template('home.html', words=words, cat_id=cat_id, cat_name=cat_name, error=request.args.get("message"), categories=categories)
@@ -71,21 +73,38 @@ def word_page(word_id):
         return redirect('/?error=Word+not+found')  # Redirect to the home page with an error message
 
     # Get the category name for the word
-    cat_name = db.run_query("SELECT name FROM category WHERE id = ?", (word_id,), False, False)
+    # We need to get all categories for the sidebar anyway, so we do it here and save ourselves an extra database query
+    categories = helpers.get_categories()  # Retrieve all categories from the database
 
-    if cat_name is None:
-        return redirect('/?error=Category+for+word+not+found')
-    else:
-        cat_name = cat_name[0]
+    # Check if the category id provided is valid and grab the category name
+    cat_name = helpers.cat_id_to_name(word[5], categories)
 
-    categories = helpers.get_categories()  # Retrieve all categories from the database for the sidebar
+    if cat_name is None: # If the category id is invalid
+        return redirect('/?error=Category+for+word+not+found') # Redirect to the home page with an error message
+
     # Render the word details page, passing the word and sidebar categories to the template
     return render_template('word.html', word=word, cat_name=cat_name, categories=categories)
 
-# /add_word (Add word page) route
+# /add_word/<cat_id> (Add word page) route
 def add_word_page(cat_id):
     if not helpers.user_authenticated():  # Check if the user is logged in
         return redirect('/login')  # If not, redirect to the login page
+
+    # We do this validation for both GET and POST requests, so that's why it's here
+
+    # Validate category id is an int
+    try:
+        cat_id = int(cat_id)
+    except ValueError:
+        return redirect('/?error=Category+ID+is+invalid.')
+
+    categories = helpers.get_categories()  # Retrieve all categories from the database
+    # We need to get all categories for the sidebar anyway, so we do it here and save ourselves an extra database query
+
+    cat_name = helpers.cat_id_to_name(cat_id, categories)  # Check if the category id provided is valid and grab the category name
+
+    if cat_name is None:  # If the category id is invalid
+        return redirect('/?error=Category+not+found')  # Redirect to the home page with an error message
 
     if request.method == 'POST':  # If the form is submitted (POST request)
         # Check data exists
@@ -139,29 +158,9 @@ def add_word_page(cat_id):
         except ValueError: # If the level is not an integer
             return redirect('/add-word/' + cat_id + '?error=Level must be a number.') # Redirect to the add word page with an error message
 
-    # We exit the if statement to run the following usual validation of our category id
-
-    # Validate category id is an int
-    try:
-        cat_id = int(cat_id)
-    except ValueError:
-        return redirect('/add-word/' + cat_id + '/?=Category+ID+is+invalid.')
-
-    # Check if the category id provided is valid and grab the category name
-    cat_name = db.run_query("SELECT name FROM category WHERE id = ?", (cat_id,), False, False)
-
-    if cat_name is None:  # If the category id is invalid
-        return redirect('/?error=Category+not+found')
-    else:
-        cat_name = cat_name[0]
-
-    # Re-enter the if statement after our usual validation
-    if request.method == 'POST':
         # Insert the word into the database
         db.run_query("INSERT INTO word (maori, english, definition, level, category, filename) VALUES (?, ?, ?, ?, ?, ?)", (maori, english, definition, level, cat_id, filename), False, True)
         return redirect('/category/' + str(cat_id) + '?message=Word+added+successfully.')
-
-    categories = helpers.get_categories()  # Retrieve all categories from the database for the dropdown
 
     return render_template('add_word.html', cat_id=cat_id, cat_name=cat_name, error=request.args.get("error"), categories=categories)
 

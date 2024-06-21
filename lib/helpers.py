@@ -56,3 +56,35 @@ def validate_string_regex(field: str, regex: str):
         True if the field is valid, otherwise False
     """
     return re.match(regex, field) is not None
+
+def get_category_names(words: tuple, categories: tuple):
+    """ Add the category name to each word tuple
+    Parameters:
+        words (tuple): A tuple of word tuples
+        categories (tuple): A tuple of category tuples
+    Returns:
+        A list of word tuples with the category name added
+    """
+    # Add the category name to each word tuple
+    for i in range(len(words)): # For each word
+        for j in range(len(categories)): # For each category
+            if words[i][5] == categories[j][0]: # If the category ID matches
+                words[i] = words[i] + (categories[j][1],) # Add the category name to the word tuple
+                break # Break the loop
+        if len(words[i]) == 6: # If the category name was not added
+            # This means that the category ID was not found, so add "Unknown" to the word tuple
+            words[i] = words[i] + ("Unknown",)
+    return words
+
+def cat_id_to_name(cat_id: int, categories: tuple):
+    """ Convert a category ID to a category name
+    Parameters:
+        cat_id (int): The category ID to convert
+        categories (tuple): A tuple of category tuples
+    Returns:
+        The category name for the category ID provided
+    """
+    for i in range(len(categories)): # For each category
+        if categories[i][0] == cat_id: # If the category ID matches
+            return categories[i][1] # Return the category name
+    return "Unknown" # If the category ID is not found, return "Unknown"
