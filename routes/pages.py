@@ -6,7 +6,7 @@ This file contains our routes for viewing categories and words.
 
 # Import the necessary modules
 from flask import render_template, redirect, session, request
-from lib import globals, db, helpers
+from lib import db, helpers
 
 
 # Define our routes
@@ -17,12 +17,7 @@ def home_page():
         return redirect('/login')  # If not, redirect to the login page
 
     # Retrieve all words from the database
-    query = "SELECT id, maori, english, definition, level, category, filename FROM word"  # Query to retrieve all words
-    conn = db.create_connection(globals.DATABASE_FILE)  # Create a connection to the database
-    cur = conn.cursor()  # Create a cursor object
-    cur.execute(query)  # Execute the query
-    words = cur.fetchall()  # Retrieve all words
-    conn.close()  # Close the connection
+    words = db.run_query("SELECT id, maori, english, definition, level, category, filename FROM word", (), True, False)
 
     categories = helpers.get_categories()  # Retrieve all categories from the database for the sidebar
     # Render the home page, passing the words and categories to the template
@@ -41,12 +36,7 @@ def category_page(cat_id):
         return redirect('/?error=Category+ID+is+invalid.')
 
     # Check if the category id provided is valid and grab the category name
-    query = "SELECT name FROM category WHERE id = ?"  # Query to retrieve the category name
-    conn = db.create_connection(globals.DATABASE_FILE)  # Create a connection to the database
-    cur = conn.cursor()  # Create a cursor object
-    cur.execute(query, (cat_id,))  # Execute the query
-    cat_name = cur.fetchone()  # Retrieve the category name
-    conn.close()  # Close the connection
+    cat_name = db.run_query("SELECT name FROM category WHERE id = ?", (cat_id,), False, False)
 
     if cat_name is None:  # If the category id is invalid
         return redirect('/?error=Category+not+found')  # Redirect to the home page
@@ -54,13 +44,7 @@ def category_page(cat_id):
         cat_name = cat_name[0] # Retrieve the category name from the tuple
 
     # Retrieve all words from the database that match the category id provided
-    # Query to retrieve all words in a category
-    query = "SELECT id, maori, english, definition, level, category, filename FROM word WHERE category = ?"
-    conn = db.create_connection(globals.DATABASE_FILE)  # Create a connection to the database
-    cur = conn.cursor()  # Create a cursor object
-    cur.execute(query, (cat_id,))  # Execute the query
-    words = cur.fetchall()  # Retrieve all words
-    conn.close()  # Close the connection
+    words = db.run_query("SELECT id, maori, english, definition, level, category, filename FROM word WHERE category = ?", (cat_id,), True, False)
 
     categories = helpers.get_categories()  # Retrieve all categories from the database for the sidebar
 
@@ -73,33 +57,26 @@ def word_page(word_id):
     if not helpers.user_authenticated():  # Check if the user is logged in
         return redirect('/login')  # If not, redirect to the login page
 
-    # Retrieve the word from the database that matches the word id provided
-    # Query to retrieve a single word
-    query = "SELECT id, maori, english, definition, level, category, filename FROM word WHERE id = ?"
-    conn = db.create_connection(globals.DATABASE_FILE)  # Create a connection to the database
-    cur = conn.cursor()  # Create a cursor object
-    cur.execute(query, (word_id,))  # Execute the query
-    word = cur.fetchone()  # Retrieve the word
-    conn.close()  # Close the connection
-
-    if word is None:  # If the word id is invalid
-        return redirect('/?error=Word+not+found')
-
     # Validate word id is an int
     try:
         word_id = int(word_id) # Convert to int
     except ValueError:
         return redirect('/?=Word+ID+is+invalid.') # Redirect to the home page with an error message
 
-    # Get the category name for the word
-    query = "SELECT name FROM category WHERE id = ?"  # Query to retrieve the category name
-    conn = db.create_connection(globals.DATABASE_FILE)  # Create a connection to the database
-    cur = conn.cursor()  # Create a cursor object
-    cur.execute(query, (word[5],))  # Execute the query
-    cat_name = cur.fetchone()  # Retrieve the category name
-    conn.close()  # Close the connection
+    # Retrieve the word from the database that matches the word id provided
+    # Query to retrieve a single word
+    word = db.run_query("SELECT id, maori, english, definition, level, category, filename FROM word WHERE id = ?", (word_id,), False, False)
 
-    cat_name = cat_name[0]  # Retrieve the category name from the tuple
+    if word is None:  # If the word id is invalid
+        return redirect('/?error=Word+not+found')  # Redirect to the home page with an error message
+
+    # Get the category name for the word
+    cat_name = db.run_query("SELECT name FROM category WHERE id = ?", (word_id,), False, False)
+
+    if cat_name is None:
+        return redirect('/?error=Category+for+word+not+found')
+    else:
+        cat_name = cat_name[0]
 
     categories = helpers.get_categories()  # Retrieve all categories from the database for the sidebar
     # Render the word details page, passing the word and sidebar categories to the template
@@ -171,12 +148,7 @@ def add_word_page(cat_id):
         return redirect('/add-word/' + cat_id + '/?=Category+ID+is+invalid.')
 
     # Check if the category id provided is valid and grab the category name
-    query = "SELECT name FROM category WHERE id = ?"  # Query to retrieve the category name
-    conn = db.create_connection(globals.DATABASE_FILE)  # Create a connection to the database
-    cur = conn.cursor()  # Create a cursor object
-    cur.execute(query, (cat_id,))  # Execute the query
-    cat_name = cur.fetchone()  # Retrieve the category name
-    conn.close()  # Close the connection
+    cat_name = db.run_query("SELECT name FROM category WHERE id = ?", (cat_id,), False, False)
 
     if cat_name is None:  # If the category id is invalid
         return redirect('/?error=Category+not+found')
@@ -186,14 +158,8 @@ def add_word_page(cat_id):
     # Re-enter the if statement after our usual validation
     if request.method == 'POST':
         # Insert the word into the database
-        query = "INSERT INTO word (maori, english, definition, level, category, filename) VALUES (?, ?, ?, ?, ?, ?)"
-        conn = db.create_connection(globals.DATABASE_FILE)
-        cur = conn.cursor()
-        cur.execute(query, (maori, english, definition, level, cat_id, filename))
-        conn.commit()
-        conn.close()
+        db.run_query("INSERT INTO word (maori, english, definition, level, category, filename) VALUES (?, ?, ?, ?, ?, ?)", (maori, english, definition, level, cat_id, filename), False, True)
         return redirect('/category/' + str(cat_id) + '?message=Word+added+successfully.')
-
 
     categories = helpers.get_categories()  # Retrieve all categories from the database for the dropdown
 
@@ -211,12 +177,7 @@ def delete_word_page(word_id):
         return redirect('/?error=Word+ID+is+invalid.')
 
     # Check if the word id provided is valid
-    query = "SELECT english FROM word WHERE id = ?"  # Query to retrieve the word id
-    conn = db.create_connection(globals.DATABASE_FILE)  # Create a connection to the database
-    cur = conn.cursor()  # Create a cursor object
-    cur.execute(query, (word_id,))  # Execute the query
-    word_english = cur.fetchone()  # Retrieve the word id
-    conn.close()  # Close the connection
+    word_english = db.run_query("SELECT english FROM word WHERE id = ?", (word_id,), False, False)
 
     if word_english is None:  # If the word id is invalid
         return redirect('/?error=Word+not+found')  # Redirect to the home page with an error message
@@ -230,12 +191,7 @@ def delete_word_page(word_id):
             return redirect('/delete-word/' + str(word_id) + '?error=Please+tick+the+box+to+confirm+deletion.')
 
         # Delete the word from the database
-        query = "DELETE FROM word WHERE id = ?"
-        conn = db.create_connection(globals.DATABASE_FILE)
-        cur = conn.cursor()
-        cur.execute(query, (word_id,))
-        conn.commit()
-        conn.close()
+        db.run_query("DELETE FROM word WHERE id = ?", (word_id,), False, True)
         return redirect('/?error=' + word_english + '+deleted+successfully.')
 
     categories = helpers.get_categories()  # Retrieve all categories from the database for the sidebar

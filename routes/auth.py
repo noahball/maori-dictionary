@@ -6,7 +6,7 @@ This file contains our authentication routes.
 
 # Import the necessary modules
 from flask import render_template, redirect, request, session
-from lib import globals, db, helpers, flask_server
+from lib import db, helpers, flask_server
 
 # Import the bcrypt object created when initialising the Flask app
 bcrypt = flask_server.bcrypt
@@ -47,12 +47,7 @@ def login_page():
         if helpers.validate_string_regex(username, r'^(?=.{2,16}$)(?![_.])(?!.*[_.]{2})[a-zA-Z0-9._]+(?<![_.])$') is False or helpers.validate_string_regex(password, r'^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,64}$') is False:
             return redirect('/login?error=Invalid+username+or+password')
 
-        query = "SELECT id, name, username, password, type FROM user WHERE username = ?"  # Query to retrieve the user data from the database
-        conn = db.create_connection(globals.DATABASE_FILE)  # Create a connection to the database
-        cur = conn.cursor()  # Create a cursor object
-        cur.execute(query, (username,))  # Execute the query
-        user_data = cur.fetchone()  # Retrieve the user data
-        conn.close()  # Close the connection
+        user_data = db.run_query("SELECT id, name, username, password, type FROM user WHERE username = ?", (username,), False, False)  # Retrieve the user data from the database
 
         if user_data is None:  # If the user does not exist
             return redirect(
@@ -144,26 +139,16 @@ def signup_page():
         hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
 
         # Check if user with username already exists
-        conn = db.create_connection(globals.DATABASE_FILE)  # Create a connection to the database
-        query = "SELECT id FROM user WHERE username = ?"  # Query to retrieve the user data from the database
-        # We only need to check if the user exists, so we only retrieve the user id
-        cur = conn.cursor()  # Create a cursor object
-        cur.execute(query, (username,))  # Execute the query
-        user_data = cur.fetchone()  # Retrieve the user data
-        conn.close()  # Close the connection
+        user_data = db.run_query("SELECT id FROM user WHERE username = ?", (username,), False, False)  # Retrieve the user data from the database
 
         if user_data is not None:  # If the user already exists
             return redirect(
                 '/signup?error=Username+is+already+taken')  # Redirect to the sign up page with an error message
 
-        query = "INSERT INTO user (name, username, password, type) VALUES (?, ?, ?, ?)"  # Query to insert the new user into the database
-        conn = db.create_connection(globals.DATABASE_FILE)  # Create a connection to the database
-        cur = conn.cursor()  # Create a cursor object
-        cur.execute(query, (name, username, hashed_password, 1))  # Execute the query
+        # Insert the new user into the database
+        db.run_query("INSERT INTO user (name, username, password, type) VALUES (?, ?, ?, ?)", (name, username, hashed_password, 1), False, True)
         # All new users are created as students (type 1)
         # They can be promoted to a teacher (type 2) by another teacher later on.
-        conn.commit()  # Commit the changes to the database
-        conn.close()  # Close the connection
 
         return redirect('/login')  # Redirect to the login page
 

@@ -12,7 +12,7 @@ from lib import db, globals  # Import our database functions and global environm
 
 
 def get_categories():
-    """ Retrieve all categories from the database
+    """ Retrieve all categories from the database for the sidebar
     Parameters:
     Returns:
         A list of all categories in the categories table
