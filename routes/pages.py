@@ -277,13 +277,13 @@ def manage_users_page():
             return redirect('/manage-users?error=You+cannot+change+your+own+type')
 
         # Check if user exists
-        user_data = db.run_query("SELECT id, type FROM user WHERE id = ?", (user_id,), False, False)
+        user_data = db.run_query("SELECT type FROM user WHERE id = ?", (user_id,), False, False)
 
         if user_data is None:  # If the user does not exist
             return redirect('/manage-users?error=User+not+found.')
 
         # Check if updating to the same type
-        if user_data[1] == user_type:
+        if user_data[0] == user_type:
             return redirect('/manage-users?error=User+type+is+already+set+to+that+value.')
 
         db.run_query("UPDATE user SET type = ? WHERE id = ?", (user_type, user_id), False, True)

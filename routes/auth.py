@@ -11,10 +11,6 @@ from lib import db, helpers, flask_server
 # Import the bcrypt object created when initialising the Flask app
 bcrypt = flask_server.bcrypt
 
-
-# TODO: Signup error handling
-# TODO: Check data length and format. Strip all data.
-
 # /login (Log In Page) route
 def login_page():
     if helpers.user_authenticated():  # Check if the user is already logged in
@@ -106,7 +102,7 @@ def signup_page():
         
         Usernames:
         - 2-16 characters long
-        - no _ or . at the beginnning
+        - no _ or . at the beginning
         - no __ or _. or ._ or .. inside
         - can contain a-z, A-Z, 0-9, _ and .
         - no _ or . at the end

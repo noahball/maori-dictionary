@@ -10,7 +10,7 @@ from flask_bcrypt import Bcrypt
 
 from lib import globals # Import our global environment variables
 
-app = Flask(__name__, template_folder='../templates', static_folder='../static') # Create a Flask app object.
-# We have to manually define our folders as flask_server.py is nested inside
+app = Flask(__name__, template_folder='../templates', static_folder='../static') # Create a Flask app object
+# We have to manually define our folders because flask_server.py is nested inside the lib folder
 bcrypt = Bcrypt(app) # Create a Bcrypt object
 app.secret_key = globals.SECRET_KEY # Set the secret key for our sessions
